@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Orders</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+</head>
+<body>
+
+<div th:replace="navbar :: navbar"></div>
+
+<div style="height: 100px;width: 10;"><p>.</p></div>
+
+<div th:if="${success}" th:text="${success}" id="success-message"></div>
+
+
+<div class="container mt-5">
+    <h1>Your Orders</h1>
+
+    <!-- Check if there are orders -->
+    <div th:if="${orders.isEmpty()}">
+        <p>No orders found.</p>
+    </div>
+
+    <div th:each="order : ${orders}">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Order #<span th:text="${order.id}"></span></h4>
+                <p>Status: <span th:text="${order.orderStatus}"></span></p>
+                <p>Payment Method: <span th:text="${order.paymentMethod}"></span></p>
+                <p>Shipping Address: <span th:text="${order.address.address} + ', ' + ${order.address.city} + ', ' + ${order.address.state}"></span></p>
+            </div>
+            <div class="card-body">
+                <h5>Order Items:</h5>
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Product</th>
+                        <th>Description</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Discount Price</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <!-- Loop through the order items -->
+                    <tr th:each="item : ${order.orderItems}">
+                        <td><img th:src="${item.image}" width="50px" height="50px" alt="img"></td>
+                        <td th:text="${item.productTitle}"></td>
+                        <td th:text="${item.productDescription}"></td>
+                        <td th:text="${item.productCategory}"></td>
+                        <td th:text="${item.productPrice}"></td>
+                        <td th:text="${item.productDiscountPrice}"></td>
+                        <td th:text="${item.quantity}"></td>
+                        <td th:text="${item.productPrice * item.quantity}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+
+
+                <!-- Cancel Order Button -->
+                <form th:action="@{/user/cancel-order/{id}(id=${order.id})}" method="post">
+                    <button type="submit" class="btn btn-danger" th:disabled="${order.orderStatus == T(com.example.E_Commerce.model.OrderStatus).CANCELLED or order.orderStatus == T(com.example.E_Commerce.model.OrderStatus).DELIVERED}">
+                        Cancel Order
+                    </button>
+                </form>
+                <a th:href="@{'/user/order/invoice/' + ${order.id}}" class="btn btn-primary mt-2">View Details</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // Check if the success message element has text
+    document.addEventListener("DOMContentLoaded", () => {
+        const successMessageElement = document.getElementById("success-message");
+        const successMessage = successMessageElement?.textContent || "";
+
+        if (successMessage) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: successMessage,
+                confirmButtonText: 'OK'
+            });
+        }
+    });
+</script>
+
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

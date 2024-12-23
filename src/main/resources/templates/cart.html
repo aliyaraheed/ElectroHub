@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+          crossorigin="anonymous">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+          integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <title>Cart</title>
+</head>
+<body>
+
+<div th:replace="navbar :: navbar"></div>
+
+<section class="h-100 gradient-custom mt-4">
+    <div th:if="${cart != null and cart.items != null and !cart.items.isEmpty()}" class="container py-5">
+        <div class="row d-flex justify-content-center my-4">
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header py-3">
+                        <h5 class="mb-0">Cart - <span th:text="${#lists.size(cart.items)}"></span> items</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Cart Items -->
+                        <div class="row mb-4 cart-item-row" th:each="item : ${cart.items}">
+                            <div class="col-lg-3 col-md-12 mb-4 mb-lg-0">
+                                <!-- Image -->
+                                <div class="bg-image hover-overlay hover-zoom ripple rounded" data-mdb-ripple-color="light">
+                                    <img th:src="${item.product.images[0]}" class="w-100" alt="Product Image"/>
+                                    <a href="#!">
+                                        <div class="mask" style="background-color: rgba(251, 251, 251, 0.2)"></div>
+                                    </a>
+                                </div>
+                                <!-- Image -->
+                            </div>
+
+                            <div class="col-lg-5 col-md-6 mb-4 mb-lg-0">
+                                <!-- Data -->
+                                <p><strong th:text="${item.product.title}"></strong></p>
+                                <p class="item-price" data-price="${item.product.price}" th:text="'Price: $' + ${item.product.price}"></p>
+                                <form method="post" th:action="@{'/user/removeCartItem'}">
+                                    <input type="hidden" th:value="${item.id}" name="ItemId">
+                                    <button type="submit" class="btn btn-primary btn-sm me-1 mb-2" title="Remove item">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+
+                                <form method="post" th:action="@{'/wishlist/add/' + ${item.product.id}}">
+                                <button type="submit" class="btn btn-danger btn-sm mb-2" title="Move to the wish list">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                                </form>
+                                    <!-- Data -->
+                            </div>
+
+                            <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
+                                <!-- Quantity -->
+                                <div class="d-flex mb-4" style="max-width: 300px">
+                                    <form th:action="@{'/user/quantity-increment-and-decrement'}" th:method="post">
+                                        <input type="hidden" name="itemId" th:value="${item.id}">
+                                        <input type="hidden" name="decrement" th:value="true">
+                                        <button th:disabled="${item.quantity <=1}" class="btn btn-primary btn-minus quantity-control px-3 me-2" type="submit">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                    </form>
+
+                                    <input min="1" name="quantity" type="number" class="form-control item-quantity" th:value="${item.quantity}"/>
+
+                                    <form th:action="@{'/user/quantity-increment-and-decrement'}" th:method="post">
+                                        <input type="hidden" name="itemId" th:value="${item.id}">
+                                        <input type="hidden" name="increment" th:value="true">
+                                        <button th:disabled="${item.quantity >= (item.product.stock > 5 ? 5 : item.product.stock)}" class="btn btn-primary btn-plus quantity-control px-3 ms-2" type="submit">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                                <!-- Quantity -->
+
+                                <!-- Total Price -->
+                                <p class="text-start text-md-center">
+                                    <strong class="item-total-price" th:text="'$' + ${item.quantity * item.product.price}"></strong>
+                                </p>
+                                <!-- Total Price -->
+                            </div>
+                        </div>
+                        <hr class="my-4"/>
+                    </div>
+                </div>
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <p><strong>Expected shipping delivery</strong></p>
+                        <p class="mb-0">12.10.2020 - 14.10.2020</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header py-3">
+                        <h5 class="mb-0">Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 pb-0">
+                                Products
+                                <span class="cart-total-price" th:text="'$' + ${cart.totalPrice}"></span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                Shipping
+                                <span>Gratis</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 mb-3">
+                                <div>
+                                    <strong>Total amount</strong>
+                                    <p class="mb-0">(including VAT)</p>
+                                </div>
+                                <span><strong class="cart-total-price" th:text="'$' + ${cart.totalPrice}"></strong></span>
+                            </li>
+                        </ul>
+                        <a th:href="@{'/user/order'}" class="btn btn-primary btn-lg btn-block">Go to checkout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Empty Cart Check -->
+    <div th:if="${cart == null or cart.items == null or cart.items.isEmpty()}" class="container py-5">
+        <div class="row d-flex justify-content-center my-4">
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-body text-center">
+                        <h5>Your cart is empty</h5>
+                        <p>There are no items in your cart. Please add some products to continue.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+<!--<input type="hidden" id="username" th:value="${authentication.name}" />-->
+
+<!-- Scripts -->
+<!--<script>-->
+<!--    document.addEventListener("DOMContentLoaded", () => {-->
+<!--        // Retrieve the username from the hidden input field-->
+<!--        const username = document.getElementById("username").value;-->
+
+<!--        // Function to update totals-->
+<!--        const updateCartTotals = () => {-->
+<!--            let totalCartPrice = 0;-->
+
+<!--            document.querySelectorAll(".cart-item-row").forEach(row => {-->
+<!--                const priceElement = row.querySelector(".item-price");-->
+<!--                const quantityElement = row.querySelector(".item-quantity");-->
+<!--                const totalElement = row.querySelector(".item-total-price");-->
+
+<!--                const price = parseFloat(priceElement.dataset.price);-->
+<!--                const quantity = parseInt(quantityElement.value);-->
+
+<!--                // Update item total-->
+<!--                const itemTotal = price * quantity;-->
+<!--                totalElement.textContent = `$${itemTotal.toFixed(2)}`;-->
+
+<!--                // Add to cart total-->
+<!--                totalCartPrice += itemTotal;-->
+<!--            });-->
+
+<!--            // Update cart total in the summary-->
+<!--            document.querySelectorAll(".cart-total-price").forEach(element => {-->
+<!--                element.textContent = `$${totalCartPrice.toFixed(2)}`;-->
+<!--            });-->
+<!--        };-->
+
+<!--        // Attach event listeners for quantity changes-->
+<!--        document.querySelectorAll(".quantity-control").forEach(button => {-->
+<!--            button.addEventListener("click", async (event) => {-->
+<!--                const row = event.target.closest(".cart-item-row");-->
+<!--                const itemId = row.querySelector("input[name='quantity']").getAttribute("data-item-id");-->
+<!--                const quantityInput = row.querySelector(".item-quantity");-->
+
+<!--                let increment = false;-->
+<!--                let decrement = false;-->
+
+<!--                if (button.classList.contains("btn-minus") && quantityInput.value > 1) {-->
+<!--                    quantityInput.value = parseInt(quantityInput.value) - 1;-->
+<!--                    decrement = true;-->
+<!--                } else if (button.classList.contains("btn-plus")) {-->
+<!--                    quantityInput.value = parseInt(quantityInput.value) + 1;-->
+<!--                    increment = true;-->
+<!--                }-->
+
+<!--                // Update totals-->
+<!--                updateCartTotals();-->
+
+<!--                // Send update request to the backend with the username-->
+<!--                try {-->
+<!--                    const response = await fetch(`/quantity-increment-and-decrement/${itemId}?increment=${increment}&decrement=${decrement}&username=${username}`, {-->
+<!--                        method: 'PUT',-->
+<!--                        headers: {-->
+<!--                            'Content-Type': 'application/json',-->
+<!--                        },-->
+<!--                        credentials: 'same-origin' // Ensure the session cookie is sent with the request-->
+<!--                    });-->
+
+<!--                    if (!response.ok) {-->
+<!--                        throw new Error("Failed to update cart item");-->
+<!--                    }-->
+
+<!--                    // Optionally handle the success response here, e.g., show a success message.-->
+<!--                } catch (error) {-->
+<!--                    console.error("Error updating cart item:", error);-->
+<!--                    // Optionally handle the error, e.g., show an error message.-->
+<!--                }-->
+<!--            });-->
+<!--        });-->
+
+<!--        // Initialize totals-->
+<!--        updateCartTotals();-->
+<!--    });-->
+
+<!--</script>-->
+
+</body>
+</html>

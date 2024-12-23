@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ADD PRODUCT</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+          crossorigin="anonymous">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+          integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+</head>
+<body>
+<!-- Start Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+    <a class="navbar-brand" href="#">
+        <i class="fa-solid fa-cart-shopping"></i> ElectroHub
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+                <a class="nav-link" href="/admin/index">
+                    <i class="fa-solid fa-house"></i> Home
+                </a>
+            </li>
+        </ul>
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fa-solid fa-user-circle"></i> Admin
+                </a>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="adminDropdown">
+                    <a class="dropdown-item" href="#">Profile</a>
+                    <a class="dropdown-item" href="#">Settings</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#">Logout</a>
+                </div>
+            </li>
+        </ul>
+    </div>
+</nav>
+<!-- End Navbar -->
+
+<section>
+    <div class="container p-5 mt-3">
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <div class="card shadow">
+                    <div class="card-header text-center">
+                        <h3 class="fs-4 mb-0">Add Product</h3>
+                        <th:block th:if="${session.successMsg}">
+                            <p class="text-success fw-bold">[[${session.successMsg}]]</p>
+                            <th:block th:text="${@commonServiceImpl.removeSessionMessage()}"></th:block>
+                        </th:block>
+                        <th:block th:if="${session.errorMsg}">
+                            <p class="text-danger fw-bold">[[${session.errorMsg}]]</p>
+                            <th:block th:text="${@commonServiceImpl.removeSessionMessage()}"></th:block>
+                        </th:block>
+                    </div>
+
+                    <div class="card-body">
+                        <form th:action="@{/admin/saveProduct}" method="post" enctype="multipart/form-data">
+                            <!-- Title Input -->
+                            <div class="mb-3">
+                                <label for="title">Enter Title</label>
+                                <input type="text" id="title" name="title" class="form-control" required>
+                            </div>
+
+                            <!-- Description Input -->
+                            <div class="mb-3">
+                                <label for="description">Enter Description</label>
+                                <textarea id="description" name="description" rows="3" class="form-control" required></textarea>
+                            </div>
+
+                            <!-- Category Selection -->
+                            <div class="mb-3">
+                                <label>Category</label>
+                                <select class="form-control" name="category">
+                                    <option>--select--</option>
+                                    <option th:each="c:${categories}" th:value="${c.name}">[[${c.name}]]</option>
+                                </select>
+                            </div>
+
+                            <!-- Price Input -->
+                            <div class="mb-3">
+                                <label for="price">Enter Price</label>
+                                <input type="number" id="price" name="price" class="form-control" min="0" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label>Status</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" checked value="true" name="isActive" id="flexRadioDefault1">
+                                    <label class="form-check-label" for="flexRadioDefault1">Active</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="isActive" value="false" id="flexRadioDefault2">
+                                    <label class="form-check-label" for="flexRadioDefault2">Inactive</label>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="discount">Discount</label>
+                                        <input type="number" id="discount" name="discount" class="form-control" min="0" required>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label for="discountPrice">Discount Price</label>
+                                        <input disabled type="number" readonly id="discountprice" name="discountPrice" class="form-control" min="0" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Row for Stock and Image -->
+                            <div class="row">
+                                <!-- Stock Input -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="stock">Enter Stock</label>
+                                    <input type="number" id="stock" name="stock" class="form-control" min="0" required>
+                                </div>
+
+                                <!-- Image Upload -->
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="file1">Upload Image 1</label>
+                                        <input type="file" id="file1" name="file1" class="form-control" accept="image/*" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="file2">Upload Image 2</label>
+                                        <input type="file" id="file2" name="file2" class="form-control" accept="image/*" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="file3">Upload Image 3</label>
+                                        <input type="file" id="file3" name="file3" class="form-control" accept="image/*" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <button type="submit" class="btn btn-primary btn-block">Submit</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Image Upload Modals for Cropping -->
+<!-- Modal for Image 1 -->
+<div class="modal fade" id="cropperModal1" tabindex="-1" role="dialog" aria-labelledby="cropperModalLabel1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cropperModalLabel1">Crop Image 1</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <img id="image1" src="" alt="Image 1">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="cropImage1">Crop</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Image 2 -->
+<div class="modal fade" id="cropperModal2" tabindex="-1" role="dialog" aria-labelledby="cropperModalLabel2" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cropperModalLabel2">Crop Image 2</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <img id="image2" src="" alt="Image 2">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="cropImage2">Crop</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Image 3 -->
+<div class="modal fade" id="cropperModal3" tabindex="-1" role="dialog" aria-labelledby="cropperModalLabel3" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cropperModalLabel3">Crop Image 3</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <img id="image3" src="" alt="Image 3">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="cropImage3">Crop</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Initialize Cropper.js for all images
+    let cropper1, cropper2, cropper3;
+
+    function initializeCropper(imageId) {
+        return new Cropper(document.getElementById(imageId), {
+            aspectRatio: 1,  // Optional: make it square
+            viewMode: 1, // Ensure the image fits within the container
+            scalable: true,
+            zoomable: true
+        });
+    }
+
+    document.getElementById('file1').addEventListener('change', function (event) {
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var imageElement = document.getElementById('image1');
+            imageElement.src = e.target.result;
+            $('#cropperModal1').modal('show');
+            if (cropper1) cropper1.destroy();  // Destroy any previous instance
+            cropper1 = initializeCropper('image1');
+        };
+        reader.readAsDataURL(event.target.files[0]);
+    });
+
+    document.getElementById('file2').addEventListener('change', function (event) {
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var imageElement = document.getElementById('image2');
+            imageElement.src = e.target.result;
+            $('#cropperModal2').modal('show');
+            if (cropper2) cropper2.destroy();
+            cropper2 = initializeCropper('image2');
+        };
+        reader.readAsDataURL(event.target.files[0]);
+    });
+
+    document.getElementById('file3').addEventListener('change', function (event) {
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var imageElement = document.getElementById('image3');
+            imageElement.src = e.target.result;
+            $('#cropperModal3').modal('show');
+            if (cropper3) cropper3.destroy();
+            cropper3 = initializeCropper('image3');
+        };
+        reader.readAsDataURL(event.target.files[0]);
+    });
+
+
+ document.getElementById('cropImage1').addEventListener('click', function () {
+    const croppedCanvas = cropper1.getCroppedCanvas();
+    croppedCanvas.toBlob(function (blob) {
+        const file = new File([blob], 'cropped_image1.jpg', { type: 'image/jpeg' });
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        document.getElementById('file1').files = dataTransfer.files; // Set the cropped image in the file input
+    });
+    $('#cropperModal1').modal('hide'); // Close the modal after cropping
+});
+
+document.getElementById('cropImage2').addEventListener('click', function () {
+    const croppedCanvas = cropper2.getCroppedCanvas();
+    croppedCanvas.toBlob(function (blob) {
+        const file = new File([blob], 'cropped_image2.jpg', { type: 'image/jpeg' });
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        document.getElementById('file2').files = dataTransfer.files;
+    });
+    $('#cropperModal2').modal('hide');
+});
+
+document.getElementById('cropImage3').addEventListener('click', function () {
+    const croppedCanvas = cropper3.getCroppedCanvas();
+    croppedCanvas.toBlob(function (blob) {
+        const file = new File([blob], 'cropped_image3.jpg', { type: 'image/jpeg' });
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        document.getElementById('file3').files = dataTransfer.files;
+    });
+    $('#cropperModal3').modal('hide');
+});
+
+
+</script>
+
+</body>
+</html>

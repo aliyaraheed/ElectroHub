@@ -1,0 +1,60 @@
+<nav class="navbar navbar-expand-lg mb-5 navbar-dark bg-primary fixed-top" th:fragment="navbar">
+    <a class="navbar-brand" href="#">
+        <i class="fa-solid fa-cart-shopping">ElectroHub</i></a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+                <a class="nav-link" th:href="@{/}">
+                    <i class="fa-solid fa-house"></i>Home <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" href="/products">Products <span class="sr-only">(current)</span></a>
+            </li>
+
+
+        </ul>
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+            <li class="nav-item active me-3">
+                <a class="nav-link" th:href="@{/user/cart}">
+                    <i class="fa-solid fa-cart-shopping"></i> Cart
+                </a>
+            </li>
+            <li class="nav-item active me-3">
+                <a class="nav-link" th:href="@{/wishlist}">
+                    <i class="fa-solid fa-heart"></i> Wishlist
+                </a>
+            </li>
+
+            <li class="nav-item active">
+             <span th:if="${#authentication == null or not #authentication.isAuthenticated()}">
+    <a class="nav-link" href="/login">
+        <i class="fa-solid fa-right-to-bracket"></i> LOGIN <span class="sr-only">(current)</span>
+    </a>
+</span>
+                <form th:action="@{/logout}" method="POST" class="d-inline">
+                    <button type="submit" class="btn btn-link p-0" style="color: white">
+                        <i class="fa-solid fa-right-to-bracket"></i>LOGOUT
+                    </button>
+                </form>
+
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" href="/register">REGISTER<span class="sr-only">(current)</span></a>
+            </li>
+
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" th:href="@{'/user/profile'}">
+                    <i class="fa-solid fa-user"></i> Profile
+                </a>
+            </li>
+
+
+
+        </ul>
+
+    </div>
+</nav>

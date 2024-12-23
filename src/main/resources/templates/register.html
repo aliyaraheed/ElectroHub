@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>REGISTER</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+          crossorigin="anonymous">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+          integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+<!-- Start Navbar  -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <a class="navbar-brand" href="#">
+        <i class="fa-solid fa-cart-shopping">ElectroHub</i></a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+</nav>
+<!-- end Navbar -->
+
+<section>
+    <div class="container mt-5 p-5">
+        <div class="col-md-7 p-2">
+            <div class="card shadow p-3 mb-5 bg-body-tertiary rounded">
+                <div class="card-header text-center">
+                    <p class="fs-4 text-center">Register</p>
+                </div>
+                <div class="card-body">
+                    <!-- Form Start -->
+                    <form id="registerForm" th:action="@{/saveUser}" enctype="multipart/form-data" method="post">
+                        <div class="row">
+                            <div class="col">
+                                <label class="form-label">Full Name</label>
+                                <input required class="form-control" name="name" type="text">
+                            </div>
+                            <div class="col">
+                                <label class="form-label">Mobile Number</label>
+                                <input required class="form-control" name="mobileNumber" type="number">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input required class="form-control" name="email" type="email">
+                        </div>
+
+                        <div class="row">
+                            <div class="col">
+                                <label class="form-label">Address</label>
+                                <input required class="form-control" name="address" type="text">
+                            </div>
+                            <div class="col">
+                                <label class="form-label">City</label>
+                                <input required class="form-control" name="city" type="text">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col">
+                                <label class="form-label">State</label>
+                                <input required class="form-control" name="state" type="text">
+                            </div>
+                            <div class="col">
+                                <label class="form-label">Pincode</label>
+                                <input required class="form-control" name="pincode" type="number">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col">
+                                <label class="form-label">Password</label>
+                                <input id="password" required class="form-control" name="password" type="password">
+                            </div>
+                            <div class="col">
+                                <label class="form-label">Confirm Password</label>
+                                <input id="confirmPassword" required class="form-control" name="cpassword" type="password">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Profile Image</label>
+                            <input class="form-control" name="img" type="file">
+                        </div>
+
+                        <!-- Error Message Display -->
+                        <p id="errorMsg" class="text-danger fw-bold"></p>
+
+                        <button type="submit" class="btn bg-primary text-white col-md-12">Register</button>
+                    </form>
+                    <!-- Form End -->
+                </div>
+
+                <div class="card-footer text-center">
+                    Have an account? <a href="/login" class="text-decoration-none">Login</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-primary text-white text-center py-3 mt-auto w-100">
+    <p class="mb-0">© 2024 ElectroHub. All rights reserved.</p>
+    <p class="mb-0">
+        <a href="#" class="text-white text-decoration-none">Privacy Policy</a> |
+        <a href="#" class="text-white text-decoration-none">Terms of Service</a>
+    </p>
+</footer>
+
+<!-- JavaScript for Form Validation -->
+<script>
+    document.getElementById('registerForm').addEventListener('submit', function (e) {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const errorMsg = document.getElementById('errorMsg');
+            const phoneNumber = document.querySelector('input[name="mobileNumber"]').value;
+
+
+        errorMsg.textContent = ''; // Reset error message
+
+        if (password.length < 4) {
+            e.preventDefault(); // Stop form submission
+            errorMsg.textContent = 'Password must be at least 4 characters long.';
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            e.preventDefault(); // Stop form submission
+            errorMsg.textContent = 'Passwords do not match.';
+        }
+
+        // Phone number validation: exactly 10 digits
+    const phoneRegex = /^[0-9]{10}$/; // Regular expression for 10 digits
+    if (!phoneRegex.test(phoneNumber)) {
+        e.preventDefault();
+        errorMsg.textContent = 'Mobile number must be exactly 10 digits.';
+        return;
+    }
+    });
+</script>
+
+<!-- Bootstrap & jQuery -->
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js"></script>
+</body>
+</html>

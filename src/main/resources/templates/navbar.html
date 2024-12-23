@@ -1,0 +1,84 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" th:fragment="navbar">
+    <div class="container-fluid">
+        <!-- Brand Logo on the Left -->
+        <a class="navbar-brand d-flex align-items-center" th:href="@{/}">
+            <i class="fa-solid fa-cart-shopping me-2"></i>
+            <span class="fw-bold">ElectroHub</span>
+        </a>
+
+        <!-- Toggler for Mobile View -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Navbar Content -->
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <!-- Centered Navigation Links -->
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center" th:href="@{/}">
+                        <i class="fa-solid fa-house me-2"></i> Home
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center" href="/products">
+                        <i class="fa-solid fa-tag me-2"></i> Products
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Right-aligned User Actions -->
+            <ul class="navbar-nav">
+                <!-- Cart Link -->
+                <li class="nav-item">
+                    <a class="nav-link position-relative d-flex align-items-center" th:href="@{/user/cart}">
+                        <i class="fa-solid fa-cart-shopping me-2"></i> Cart
+                    </a>
+                </li>
+
+                <!-- Wishlist Link -->
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center" th:href="@{/wishlist}">
+                        <i class="fa-solid fa-heart me-2"></i> Wishlist
+                    </a>
+                </li>
+
+                <!-- Account Dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-solid fa-user me-2"></i> Account
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <!-- Profile Link -->
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center" th:href="@{/user/profile}">
+                                <i class="fa-solid fa-user-gear me-2"></i> Profile
+                            </a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <!-- Login Link -->
+                        <li th:if="${#authentication == null or not #authentication.isAuthenticated()}">
+                            <a class="dropdown-item d-flex align-items-center" th:href="@{/login}">
+                                <i class="fa-solid fa-right-to-bracket me-2"></i> Login
+                            </a>
+                        </li>
+                        <!-- Register Link -->
+                        <li class="nav-item active">
+                            <a class="nav-link" href="/register">REGISTER<span class="sr-only">(current)</span></a>
+                        </li>
+
+                        <!-- Logout Link -->
+
+                    </ul>
+                </li>
+                <form th:action="@{/logout}" method="POST" class="d-inline">
+                    <button type="submit" class="btn btn-link p-0" style="color: black">
+                        <i class="fa-solid fa-right-to-bracket"></i>LOGOUT
+                    </button>
+                </form>
+            </ul>
+        </div>
+    </div>
+</nav>

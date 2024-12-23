@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Invoice</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+          crossorigin="anonymous">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .invoice-element {
+            background-color: #fff;
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        table th {
+            background-color: #f2f2f2;
+        }
+
+        /* Add CSS to break pages */
+        .page-break {
+            page-break-after: always;
+        }
+        .table-container {
+            page-break-inside: auto;
+        }
+        table tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+<!-- Invoice Content -->
+<div class="container invoice-element" id="invoice-content">
+    <div class="text-center bg-primary text-white py-3 mb-4">
+        <h1>Invoice for Order #<span th:text="${order.id}"></span></h1>
+    </div>
+
+    <!-- Order Details -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h4>Order Details</h4>
+            <p><strong>Status:</strong> <span th:text="${order.orderStatus}"></span></p>
+            <p><strong>Payment Method:</strong> <span th:text="${order.paymentMethod}"></span></p>
+        </div>
+        <div class="col-md-6">
+            <h4>Shipping Address</h4>
+            <p>
+                <span th:text="${order.address.address}"></span><br>
+                <span th:text="${order.address.city}"></span>,
+                <span th:text="${order.address.state}"></span>
+            </p>
+        </div>
+    </div>
+
+    <!-- Table with Page Break -->
+    <h4 class="mb-3">Order Items</h4>
+    <div class="table-container">
+        <table class="table table-bordered text-center">
+            <thead>
+            <tr>
+                <th>Product</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Total</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item : ${order.orderItems}">
+                <td th:text="${item.productTitle}"></td>
+                <td th:text="${item.productDescription}"></td>
+                <td th:text="${item.productPrice}"></td>
+                <td th:text="${item.quantity}"></td>
+                <td th:text="${item.productPrice * item.quantity}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Page Break Example -->
+    <div class="page-break"></div>
+
+    <!-- Grand Total -->
+    <div class="text-right mt-4">
+        <h4>Grand Total: <span class="text-success" th:text="${grandTotal}"></span></h4>
+    </div>
+</div>
+
+<!-- Download Button -->
+<div class="container mt-4 text-center">
+    <button id="downloadPdf" class="btn btn-primary">
+        Download PDF
+    </button>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+    document.getElementById('downloadPdf').addEventListener('click', function () {
+        const invoiceContent = document.getElementById('invoice-content');
+        const options = {
+            margin: [10, 10, 10, 10],
+            filename: 'invoice.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        // Convert and Save PDF
+        html2pdf()
+            .set(options)
+            .from(invoiceContent)
+            .toPdf()
+            .get('pdf')
+            .then(pdf => {
+                const totalPages = pdf.internal.getNumberOfPages();
+                for (let i = 1; i <= totalPages; i++) {
+                    pdf.setPage(i);
+                    pdf.setFontSize(10);
+                    pdf.text('Page ' + i + ' of ' + totalPages, pdf.internal.pageSize.width - 20, pdf.internal.pageSize.height - 10);
+                }
+            })
+            .save();
+    });
+</script>
+
+</body>
+</html>
