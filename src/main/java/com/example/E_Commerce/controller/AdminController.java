@@ -6,7 +6,11 @@ import com.example.E_Commerce.model.Product;
 import com.example.E_Commerce.service.CategoryService;
 import com.example.E_Commerce.service.ProductService;
 import com.example.E_Commerce.service.UserService;
+import com.example.E_Commerce.service.impl.CloudinaryService;
 import jakarta.servlet.http.HttpSession;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Controller;
@@ -27,17 +31,22 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/admin")
+@Slf4j
 public class AdminController {
 
+    private static final Logger log = LoggerFactory.getLogger(AdminController.class);
     @Autowired
     private CategoryService categoryService;
 
     @Autowired
     private ProductService productService;
 
+    private final CloudinaryService cloudinaryService;
+
     private final UserService userService;
 
-    public AdminController(UserService userService) {
+    public AdminController(CloudinaryService cloudinaryService, UserService userService) {
+        this.cloudinaryService = cloudinaryService;
         this.userService = userService;
     }
 
@@ -61,7 +70,7 @@ public class AdminController {
             return "redirect:/admin/category";
         }
 
-        String imageName = file != null ? file.getOriginalFilename() : "default.jpg";
+        String imageName = cloudinaryService.uploadAndGetCloudinaryUrl(file);
         category.setImageName(imageName);
 
 
@@ -76,12 +85,6 @@ public class AdminController {
             if(ObjectUtils.isEmpty(saveCategory)){
                 session.setAttribute("errorMsg", "Not saved! internal server error!");
             }else {
-                File saveFile = new ClassPathResource("Static/img/").getFile();
-
-                Path path = Paths.get(saveFile.getAbsolutePath()+File.separator+ "category"+ File.separator+ file.getOriginalFilename());
-
-                Files.copy(file.getInputStream(),path, StandardCopyOption.REPLACE_EXISTING);
-
 
                 session.setAttribute("successMsg","saved successfully");
             }
@@ -110,10 +113,10 @@ public class AdminController {
     }
 
     @PostMapping("/updateCategory")
-    public String updateCategory(@ModelAttribute Category category, @RequestParam("file") MultipartFile file, HttpSession session){
+    public String updateCategory(@ModelAttribute Category category, @RequestParam("file") MultipartFile file, HttpSession session) throws IOException {
 
         Category oldcategory =  categoryService.getCategoryById(category.getId());
-        String imageName =  file.isEmpty() ? oldcategory.getImageName() : file.getOriginalFilename();
+        String imageName =  cloudinaryService.uploadAndGetCloudinaryUrl(file);
 
         if (!ObjectUtils.isEmpty(category)){
             oldcategory.setName(category.getName());
@@ -124,28 +127,6 @@ public class AdminController {
         Category updateCategory = categoryService.saveCategory(oldcategory);
 
         if (!ObjectUtils.isEmpty(updateCategory)){
-
-            if (!file.isEmpty()) {
-                try {
-                    File saveFile = new ClassPathResource("static/img").getFile();
-                    File saveDirectory = new File(saveFile, "category");
-
-
-                    if (!saveDirectory.exists()) {
-                        saveDirectory.mkdirs();
-                    }
-
-
-                    Path path = Paths.get(saveDirectory.getAbsolutePath(), file.getOriginalFilename());
-
-
-                    Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-
-                } catch (IOException e) {
-                    session.setAttribute("errorMsg", "File upload failed: " + e.getMessage());
-                    return "redirect:/admin/loadEditCategory" + category.getId();
-                }
-            }
 
             session.setAttribute("successMsg","category update success");
         }else {
@@ -179,53 +160,30 @@ public class AdminController {
         List<String> imageNames = new ArrayList<>();
 
 
-        String[] fileNames = {file1.getOriginalFilename(), file2.getOriginalFilename(), file3.getOriginalFilename()};
-        for (int i = 0; i < 3; i++) {
-            String fileName = fileNames[i];
-            if (fileName == null || fileName.isEmpty()) {
-                fileName = "default" + (i + 1) + ".jpg";
+        MultipartFile[] files = {file1, file2, file3};
+
+        for (MultipartFile file : files) {
+            try {
+                String imageUrl = cloudinaryService.uploadAndGetCloudinaryUrl(file);
+                imageNames.add(imageUrl);
+            } catch (Exception e) {
+                session.setAttribute("errorMsg", "Failed to upload images. Please try again.");
+                return "redirect:/admin/loadAddProduct";
             }
-            imageNames.add("/img/product/" + fileName);
         }
 
-
         product.setImages(imageNames);
+
+        session.setAttribute("successMsg", "Product and images saved successfully.");
 
 
         Product savedProduct = productService.saveProduct(product);
 
-        if (!ObjectUtils.isEmpty(savedProduct)) {
-            try {
-                File saveFile = new ClassPathResource("static/img").getFile();
-                File saveDirectory = new File(saveFile, "product");
-
-
-                if (!saveDirectory.exists()) {
-                    saveDirectory.mkdirs();
-                }
-
-
-                saveImage(file1, saveDirectory);
-                saveImage(file2, saveDirectory);
-                saveImage(file3, saveDirectory);
-
-                session.setAttribute("successMsg", "Product and images saved successfully.");
-            } catch (IOException e) {
-                session.setAttribute("errorMsg", "File upload failed: " + e.getMessage());
-                return "redirect:/admin/loadAddProduct";
-            }
-        } else {
-            session.setAttribute("errorMsg", "Something went wrong on the server.");
+        for (String url : imageNames){
+            log.info("imageUrl : {}", url);
         }
 
         return "redirect:/admin/products";
-    }
-
-    private void saveImage(MultipartFile image, File saveDirectory) throws IOException {
-        if (!image.isEmpty()) {
-            Path path = Paths.get(saveDirectory.getAbsolutePath(), image.getOriginalFilename());
-            Files.copy(image.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-        }
     }
 
 
@@ -292,20 +250,10 @@ public class AdminController {
 
 
         try {
-            File saveFile = new ClassPathResource("static/img").getFile();
-            File saveDirectory = new File(saveFile, "product");
-
-
-            if (!saveDirectory.exists()) {
-                saveDirectory.mkdirs();
-            }
-
 
             for (MultipartFile image : images) {
                 if (!image.isEmpty()) {
-                    String imageName = image.getOriginalFilename();
-                    Path path = Paths.get(saveDirectory.getAbsolutePath(), imageName);
-                    Files.copy(image.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+                    String imageName = cloudinaryService.uploadAndGetCloudinaryUrl(image);
                     updatedImageNames.add("/img/product/" + imageName);
                 } else {
 
@@ -318,10 +266,8 @@ public class AdminController {
             return "redirect:/admin/editProduct/" + product.getId();
         }
 
-        // Update the image list
         existingProduct.setImages(updatedImageNames);
 
-        // Save the updated product
         Product updatedProduct = productService.saveProduct(existingProduct);
 
         if (updatedProduct != null) {
