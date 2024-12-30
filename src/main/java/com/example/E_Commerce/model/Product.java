@@ -31,6 +31,9 @@ public class Product {
 
     private int stock;
 
+    @ElementCollection
+    @CollectionTable(name = "product_images", joinColumns = @JoinColumn(name = "product_id"))
+    @Column(name = "image_url")
     private List<String> images;
 
     private int discount;
